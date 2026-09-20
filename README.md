@@ -1,4 +1,4 @@
-Text-to-Speech Backend
+# Text-to-Speech Backend
 
 A Java Spring Boot REST API that receives text-to-speech requests, integrates with external TTS providers, validates requests, handles failures, and returns generated audio to the React frontend.
 
@@ -93,7 +93,7 @@ GET /api/health
 
 Example response:
 
-Text-to-Speech Backend is running
+# Text-to-Speech Backend is running
 
 Voices
 
@@ -115,7 +115,7 @@ Example request:
 "format": "mp3"
 }
 
-Supported formats:
+# Supported formats:
 
 mp3
 wav
