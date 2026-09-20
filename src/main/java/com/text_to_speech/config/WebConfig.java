@@ -13,7 +13,8 @@ public class WebConfig implements WebMvcConfigurer {
         registry
                 .addMapping("/api/**")
                 .allowedOrigins(
-                        "http://localhost:5173"
+                        "http://localhost:5173",
+                        "https://text-to-speech-frontend-delta.vercel.app"
                 )
                 .allowedMethods(
                         "GET",
@@ -22,7 +23,9 @@ public class WebConfig implements WebMvcConfigurer {
                         "DELETE",
                         "OPTIONS"
                 )
-                .allowedHeaders("*");
+                .allowedHeaders("*")
+                .allowCredentials(false);
+
     }
 }
 
