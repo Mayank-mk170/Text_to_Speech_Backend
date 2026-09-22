@@ -36,6 +36,8 @@
 
 		<!-- Google Cloud Libraries BOM -->
 		<google-cloud.version>26.86.0</google-cloud.version>
+
+		<aws.java.sdk.version>2.52.1</aws.java.sdk.version>
 	</properties>
 
 	<!-- ===================================================== -->
@@ -52,9 +54,18 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<groupId>software.amazon.awssdk</groupId>
+				<artifactId>bom</artifactId>
+				<version>${aws.java.sdk.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 
 		</dependencies>
 	</dependencyManagement>
+
+
 
 	<!-- ===================================================== -->
 	<!-- DEPENDENCIES -->
@@ -112,6 +123,18 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+
+		<!-- AWS Amazon Translate -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>translate</artifactId>
+		</dependency>
+
+		<!-- AWS Amazon Polly -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>polly</artifactId>
 		</dependency>
 
 	</dependencies>

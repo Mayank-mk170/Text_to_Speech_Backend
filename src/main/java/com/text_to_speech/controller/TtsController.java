@@ -20,16 +20,24 @@ public class TtsController {
 
     @PostMapping(
             value = "/tts",
-            consumes = MediaType.APPLICATION_JSON_VALUE
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = {
+                    "audio/mpeg",
+                    "audio/wav",
+                    "audio/ogg"
+            }
     )
     public ResponseEntity<byte[]> generateSpeech(
             @Valid @RequestBody TtsRequest request
     ) {
 
-        byte[] audio = ttsService.generateSpeech(request);
+        byte[] audio =
+                ttsService.generateSpeech(request);
 
         String format =
-                request.getFormat().toLowerCase();
+                request.getFormat()
+                        .trim()
+                        .toLowerCase();
 
         String contentType;
         String extension;
@@ -47,10 +55,14 @@ public class TtsController {
                 break;
 
             case "mp3":
-            default:
                 contentType = "audio/mpeg";
                 extension = "mp3";
                 break;
+
+            default:
+                throw new IllegalArgumentException(
+                        "Unsupported audio format: " + format
+                );
         }
 
         return ResponseEntity.ok()
