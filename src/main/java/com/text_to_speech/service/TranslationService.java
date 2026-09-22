@@ -1,67 +1,120 @@
-//package com.text_to_speech.service;
-//
-//import com.google.cloud.translate.v3.LocationName;
-//import com.google.cloud.translate.v3.TranslateTextRequest;
-//import com.google.cloud.translate.v3.TranslateTextResponse;
-//import com.google.cloud.translate.v3.Translation;
-//import com.google.cloud.translate.v3.TranslationServiceClient;
-//import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.stereotype.Service;
-//
-//@Service
-//public class TranslationService {
-//
-//    @Value("${google.cloud.project-id}")
-//    private String projectId;
-//
-//    public String translate(
-//            String text,
-//            String sourceLanguage,
-//            String targetLanguage
-//    ) {
-//
-//        // No translation needed
-//        if (sourceLanguage.equalsIgnoreCase(targetLanguage)) {
-//            return text;
-//        }
-//
-//        try (TranslationServiceClient client =
-//                     TranslationServiceClient.create()) {
-//
-//            LocationName parent = LocationName.of(
-//                    projectId,
-//                    "global"
-//            );
-//
-//            TranslateTextRequest request =
-//                    TranslateTextRequest.newBuilder()
-//                            .setParent(parent.toString())
-//                            .setMimeType("text/plain")
-//                            .setSourceLanguageCode(sourceLanguage)
-//                            .setTargetLanguageCode(targetLanguage)
-//                            .addContents(text)
-//                            .build();
-//
-//            TranslateTextResponse response =
-//                    client.translateText(request);
-//
-//            if (response.getTranslationsCount() == 0) {
-//                throw new IllegalStateException(
-//                        "Google returned no translation."
-//                );
-//            }
-//
-//            Translation translation =
-//                    response.getTranslations(0);
-//
-//            return translation.getTranslatedText();
-//
-//        } catch (Exception e) {
-//
-//            throw new IllegalStateException(
-//                    "Translation failed: " + e.getMessage(),
-//                    e
-//            );
-//        }
-//    }
-//}
+package com.text_to_speech.service;
+
+import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.translate.TranslateClient;
+import software.amazon.awssdk.services.translate.model.TranslateTextRequest;
+import software.amazon.awssdk.services.translate.model.TranslateTextResponse;
+
+@Service
+public class TranslationService {
+
+    private final TranslateClient translateClient;
+
+    public TranslationService(TranslateClient translateClient) {
+        this.translateClient = translateClient;
+    }
+
+    public String translateToLanguage(
+            String text,
+            String targetLanguage
+    ) {
+
+        // ------------------------------------------
+        // Validate text
+        // ------------------------------------------
+
+        if (text == null || text.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Text is required for translation."
+            );
+        }
+
+        // ------------------------------------------
+        // Validate target language
+        // ------------------------------------------
+
+        if (targetLanguage == null || targetLanguage.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Target language is required."
+            );
+        }
+
+        // Convert frontend language code
+        // to Amazon Translate language code
+        String targetCode =
+                getTargetLanguageCode(targetLanguage);
+
+        // ------------------------------------------
+        // Create Amazon Translate request
+        // ------------------------------------------
+
+        TranslateTextRequest request =
+                TranslateTextRequest.builder()
+                        .text(text)
+                        .sourceLanguageCode("auto")
+                        .targetLanguageCode(targetCode)
+                        .build();
+
+        // ------------------------------------------
+        // Call Amazon Translate
+        // ------------------------------------------
+
+        TranslateTextResponse response =
+                translateClient.translateText(request);
+
+        // ------------------------------------------
+        // Get translated text
+        // ------------------------------------------
+
+        String translatedText =
+                response.translatedText();
+
+        if (translatedText == null
+                || translatedText.isBlank()) {
+
+            throw new IllegalStateException(
+                    "Amazon Translate returned empty text."
+            );
+        }
+
+        return translatedText;
+    }
+
+    // ==================================================
+    // TARGET LANGUAGE MAPPING
+    // ==================================================
+
+    private String getTargetLanguageCode(
+            String language
+    ) {
+
+        return switch (language.trim()) {
+
+            // English
+            case "en-IN", "en" -> "en";
+
+            // Hindi
+            case "hi-IN", "hi" -> "hi";
+
+            // Gujarati
+            case "gu-IN", "gu" -> "gu";
+
+            // Marathi
+            case "mr-IN", "mr" -> "mr";
+
+            // Spanish
+            case "es", "es-ES" -> "es";
+
+            // French
+            case "fr", "fr-FR" -> "fr";
+
+            // German
+            case "de", "de-DE" -> "de";
+
+            default -> throw new IllegalArgumentException(
+                    "Unsupported translation language: "
+                            + language
+            );
+        };
+    }
+}
